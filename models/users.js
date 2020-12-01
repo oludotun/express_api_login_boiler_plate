@@ -20,5 +20,29 @@ module.exports = {
                 }
             );
         });
-    } 
+    },
+    findByEmail: (callback, email) => {
+        pool.getConnection(function(err, db) {
+            db.query(escape `
+                SELECT * FROM users WHERE email = ${email}`,
+                (error, users, fields) => {
+                    db.release();
+                    const user = users[0];
+                    callback({ error, user, fields });
+                }
+            );
+        });
+    },
+    findByID: (callback, id) => {
+        pool.getConnection(function(err, db) {
+            db.query(escape `
+                SELECT * FROM users WHERE id = ${id}`,
+                (error, users, fields) => {
+                    db.release();
+                    const user = users[0];
+                    callback({ error, user, fields });
+                }
+            );
+        });
+    }
 }
