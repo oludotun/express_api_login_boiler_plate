@@ -41,7 +41,7 @@ function initialize(passport) {
                                 type: 'error',
                                 code: 401
                             },
-                            message: `Email not verified. We sent your verification link to ${user.email}.`
+                            message: `Email not verified. We've sent your verification link to ${user.email}.`
                         });
                     }                    
                 } else {
@@ -80,7 +80,7 @@ function initialize(passport) {
                                 type: 'error',
                                 code: 401
                             },
-                            message: `Email not verified. We sent your verification link to ${user.email}.`
+                            message: `Email not verified. We've sent your verification link to ${user.email}.`
                         });
                     }
                 } else {
