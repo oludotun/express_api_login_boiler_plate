@@ -11,9 +11,9 @@ router.post('/login', function(req, res, next) {
             return next(err); 
         }
         if (!user) { 
-            return res.status(401).json({
-                status: "error",
-                message: "Access denied! Invalid email or password."
+            return res.status(info.status.code).json({
+                status: info.status.type,
+                message: info.message
             }); 
         }
         req.logIn(user, function(err) {
