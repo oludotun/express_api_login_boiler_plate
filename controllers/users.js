@@ -1,6 +1,8 @@
-const Users = require('../models/users');
+const User = require('../models/users');
 const { hash } = require('bcrypt');
 const { body, validationResult } = require('express-validator');
+const { randomString } = require('../services');
+const sendPasswordResetMail = require('../mail/password-reset');
 
 module.exports = {
     signUp: (req, res) => {
@@ -20,7 +22,7 @@ module.exports = {
         // TODO: Add recaptcha to prevent spam
         hash(body.password, 10, async (err, hash) => {
             body.password = hash;
-            Users.create((result) => {
+            User.create((result) => {
                 if(!result.error) {
                     return res.status(200).json({
                         status: "success",
@@ -54,5 +56,54 @@ module.exports = {
         //     }
         //     return true;
         // })
-    ]
+    ],
+    resetPassword: (req, res) => {
+        const email = req.body.email;
+        const password = randomString(8);
+        User.findByEmail((result) => {
+            if(!result.error) {
+                const user = result.user;
+                if(user) {
+                    hash(password, 10, async (err, hash) => {
+                        user.password = hash;
+                        User.resetPassword((result) => {
+                            if(!result.error) {
+                                sendPasswordResetMail(user, password, (result) => {
+                                    if(!result.error) {
+                                        res.status(200).json({
+                                            status: "success",
+                                            message: "Password reset successfully, please check your email for the new password."
+                                        });
+                                    } else {
+                                        console.log(result.error);
+                                        res.status(500).json({
+                                            status: "error",
+                                            message: `Password reset failed! Internal server error.`
+                                        });
+                                    }
+                                });                           
+                            } else {
+                                console.log(result.error);
+                                res.status(500).json({
+                                    status: "error",
+                                    message: `Password reset failed! Internal server error.`
+                                });
+                            }
+                        }, user);
+                    });
+                } else {
+                    res.status(404).json({
+                        status: "error",
+                        message: `Email not found.`
+                    });
+                }
+            } else {
+                console.log(result.error);
+                res.status(500).json({
+                    status: "error",
+                    message: `Password reset failed! Internal server error.`
+                });
+            }
+        }, email);        
+    }
 };
