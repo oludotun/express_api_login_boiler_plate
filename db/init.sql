@@ -1,7 +1,7 @@
 -- Delete existing database and create a new one
-DROP DATABASE IF EXISTS obha;
-CREATE DATABASE IF NOT EXISTS obha;
-USE obha;
+DROP DATABASE IF EXISTS db_name;
+CREATE DATABASE IF NOT EXISTS db_name;
+USE db_name;
 
 -- Drop all tables
 DROP TABLE IF EXISTS users;
