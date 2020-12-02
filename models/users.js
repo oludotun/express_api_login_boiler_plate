@@ -44,5 +44,18 @@ module.exports = {
                 }
             );
         });
+    },
+    resetPassword: (callback, user) => {
+        const query = escape `
+            UPDATE users
+            SET
+                password = ${user.password}
+            WHERE id = ${user.id}`;
+        pool.getConnection(function(err, db) {
+            db.query(query, (error, result, fields) => {
+                db.release();
+                callback({ error, result, fields });
+            });
+        });
     }
 }
