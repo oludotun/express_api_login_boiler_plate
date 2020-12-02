@@ -9,24 +9,58 @@ function initialize(passport) {
                 const user = result.user;
                 if(user) {
                     const hash = user.password;
-                    compare(password, hash, function(err, result) {
-                        if (!err) {
-                            if (result) {
-                                //User logged in successfully
-                                user.password = undefined;
-                                done(null, user);
+                    if(user.verified_at) {
+                        compare(password, hash, function(err, result) {
+                            if (!err) {
+                                if (result) {
+                                    //User logged in successfully
+                                    user.password = undefined;
+                                    done(null, user);
+                                } else {
+                                    done(null, false, {
+                                        status: {
+                                            type: 'error',
+                                            code: 401
+                                        },
+                                        message: 'Access denied! Invalid email or password.'
+                                    });
+                                }
                             } else {
-                                done(null, false, { message: 'Access denied! Invalid email or password.' });
+                                done(null, false, {
+                                    status: {
+                                        type: 'error',
+                                        code: 500
+                                    },
+                                    message: 'Unauthorized user! Internal server error.'
+                                });
                             }
-                        } else {
-                            done(null, false, { message: 'Unauthorized user! Internal server error.' });
-                        }
-                    });
+                        });
+                    } else {
+                        done(null, false, {
+                            status: {
+                                type: 'error',
+                                code: 401
+                            },
+                            message: `Email not verified. We sent your verification link to ${user.email}.`
+                        });
+                    }                    
                 } else {
-                    done(null, false, { message: 'Unauthorized user! Invalid email or password.' });
+                    done(null, false, {
+                        status: {
+                            type: 'error',
+                            code: 401
+                        },
+                        message: 'Unauthorized user! Invalid email or password.'
+                    });
                 }
             } else {
-                done(null, false, { message: 'Unauthorized user! Internal server error.' });
+                done(null, false, {
+                    status: {
+                        type: 'error',
+                        code: 500
+                    },
+                    message: 'Unauthorized user! Internal server error.'
+                });
             }
         }, email);
     }
@@ -38,12 +72,34 @@ function initialize(passport) {
                 const user = result.user;                
                 if(user) {
                     user.password = undefined;
-                    done(null, user);
+                    if(user.verified_at) {
+                        done(null, user);
+                    } else {
+                        done(null, false, {
+                            status: {
+                                type: 'error',
+                                code: 401
+                            },
+                            message: `Email not verified. We sent your verification link to ${user.email}.`
+                        });
+                    }
                 } else {
-                    done(null, false, { message: 'Unauthorized user! Internal server error.' });
+                    done(null, false, {
+                        status: {
+                            type: 'error',
+                            code: 500
+                        },
+                        message: 'Unauthorized user! Internal server error.'
+                    });
                 }
             } else {
-                done(null, false, { message: 'Unauthorized user! Internal server error.' });
+                done(null, false, {
+                    status: {
+                        type: 'error',
+                        code: 500
+                    },
+                    message: 'Unauthorized user! Internal server error.'
+                });
             }
         }, id);
     });
