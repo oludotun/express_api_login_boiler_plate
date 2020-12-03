@@ -1,10 +1,11 @@
 const router = require('express').Router();
-const { signUp, signUpValidator, resetPassword } = require('../controllers/users');
+const { signUp, signUpValidator, resetPassword, verifyEmail } = require('../controllers/users');
 const { requireAuthentication } = require('../middleware/auth');
 const passport = require('passport');
 
 router.post('/signup', signUpValidator, signUp);
 router.post('/password/reset', resetPassword);
+router.get('/verify/:token', verifyEmail);
 router.post('/login', function(req, res, next) {
     passport.authenticate('local', function(err, user, info) {
         if (err) { 
