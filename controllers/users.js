@@ -148,5 +148,47 @@ module.exports = {
                 });
             }
         });
+    },
+    resendVerificationMail: (req, res) => {
+        const email = req.body.email;
+        User.findByEmail((result) => {
+            if(!result.error) {
+                const user = result.user;
+                if(user) {
+                    if(!user.verified_at) {
+                        const confirmationLink = signMailConfirmationLink(user.id);
+                        // Send email confirmation mail
+                        sendMailConfirmationMail(user, confirmationLink).then(() => {
+                            return res.status(200).json({
+                                status: "success",
+                                message: `Email sent successfully to ${email}.`
+                            });
+                        }).catch((error) => {
+                            console.log(error);
+                            res.status(500).json({
+                                status: "error",
+                                message: `Verification mail not sent! Mail server error.`
+                            });
+                        });
+                    } else {
+                        res.status(422).json({
+                            status: "error",
+                            message: 'Your email address is already verified.'
+                        });
+                    }
+                } else {
+                    res.status(404).json({
+                        status: "error",
+                        message: `We could not find any user with the email ${email}.`
+                    });
+                }
+            } else {
+                console.log(result.error);
+                res.status(500).json({
+                    status: "error",
+                    message: `Verification mail not sent! Internal server error.`
+                });
+            }
+        }, email);
     }
 };
