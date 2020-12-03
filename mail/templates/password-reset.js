@@ -41,7 +41,7 @@ module.exports = {
                                         color: #74787E; font-size: 16px; line-height: 1.5em; margin-top: 0;
                                         text-align: left;">
                                     Regards,<br>
-                                    ${appName}
+                                    ${appName} Account Services
                                 </p>                                        
                             </td>
                         </tr>
@@ -60,7 +60,7 @@ module.exports = {
             Also, do ensure to change your password to something you can easily remember.
 
             Regards,
-            ${appName}
+            ${appName} Account Services
 
             © ${new Date().getFullYear()} ${appName}. All rights reserved.`;
     }
