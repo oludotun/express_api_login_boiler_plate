@@ -44,5 +44,31 @@ module.exports = {
                 }
             );
         });
+    },
+    resetPassword: (callback, user) => {
+        const query = escape `
+            UPDATE users
+            SET
+                password = ${user.password}
+            WHERE id = ${user.id}`;
+        pool.getConnection(function(err, db) {
+            db.query(query, (error, results, fields) => {
+                db.release();
+                callback({ error, results, fields });
+            });
+        });
+    },
+    verifyEmail: (callback, user_id) => {
+        const query = escape `
+            UPDATE users
+            SET
+                verified_at = CURRENT_TIMESTAMP
+            WHERE id = ${user_id}`;
+        pool.getConnection(function(err, db) {
+            db.query(query, (error, results, fields) => {
+                db.release();
+                callback({ error, results, fields });
+            });
+        });        
     }
 }
