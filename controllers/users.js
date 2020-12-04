@@ -1,5 +1,5 @@
 const User = require('../models/users');
-const { hash } = require('bcrypt');
+const { hash, compare } = require('bcrypt');
 const { sign, verify } = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const { randomString } = require('../services');
@@ -72,6 +72,82 @@ module.exports = {
         //     return true;
         // })
     ],
+    updateUser: (req, res) => {
+        const newUser = req.body;
+        const updateUser = (user) => {
+            User.update((result) => {
+                if(!result.error) {
+                    return res.status(200).json({
+                        status: "success",
+                        message: "Profile updated successfully."
+                    });
+                } else {
+                    console.log(result.error);
+                    return res.status(500).json({
+                        status: "error",
+                        message: `Profile update failed! Internal server error.`
+                    });
+                }
+            }, user);
+        }
+        //Fetch user from DB
+        User.findByID((result)=>{
+            if(!result.error) {
+                const oldUser = result.user;
+                if(oldUser) {
+                    // Check if user's email will change
+                    if(oldUser.email !== newUser.email) {
+                        newUser.new_email = newUser.email;
+                    }
+                    // Verify password for email or password update
+                    if(newUser.new_password || newUser.new_email) {
+                        // Verify the user's old password
+                        if(newUser.password) {
+                            const passwordHash = oldUser.password;
+                            compare(newUser.password, passwordHash, function(err, result) {
+                                if (!err) {
+                                    if (result) {
+                                        if(newUser.new_password) {
+                                            // Hash the new password and update user
+                                            hash(newUser.new_password, 10, async (err, hash) => {
+                                                newUser.new_password = hash;
+                                                updateUser(newUser);
+                                            });
+                                        } else {
+                                            updateUser(newUser);
+                                        }
+                                    } else {
+                                        return res.status(401).json({
+                                            status: "error",
+                                            message: "Access denied! Invalid password."
+                                        });
+                                    }
+                                } else {
+                                    console.log(err);
+                                    return res.status(500).json({
+                                        status: "error",
+                                        message: "Login failed! Internal server error."
+                                    });
+                                }
+                            });
+                        } else {
+                            return res.status(401).json({
+                                status: "error",
+                                message: "Access denied! Please provide your old password."
+                            });
+                        }
+                    } else {
+                        updateUser(newUser);
+                    }                                      
+                } else {
+                    return res.status(401).json({
+                        status: "error",
+                        message: "Access denied! Strange user activity."
+                    });
+                }
+            }
+        }, newUser.id);        
+    },
     resetPassword: (req, res) => {
         const email = req.body.email;
         const password = randomString(8);

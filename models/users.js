@@ -21,6 +21,28 @@ module.exports = {
             );
         });
     },
+    update: (callback, user) => {
+        const query = escape `
+            UPDATE users
+            SET
+                name = ${user.name}`;
+        if(user.new_email) {
+            query.append(escape `, email = ${user.new_email}`);
+            query.append(escape `, verified_at = NULL `);
+        }
+        if(user.new_password) {
+            query.append(escape `, password = ${user.new_password}`);
+        }
+        query.append(escape `WHERE id = ${user.id}`);
+        
+        pool.getConnection(function(err, db) {
+            db.query(query, (error, results, fields) => {
+                db.release();
+                callback({ error, results, fields });
+            });
+        });
+        
+    },
     findByEmail: (callback, email) => {
         pool.getConnection(function(err, db) {
             db.query(escape `
