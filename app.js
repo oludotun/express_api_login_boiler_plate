@@ -7,6 +7,7 @@ const initializePassport = require('./config/passport');
 const mysqlPool = require('./services/mysql');
 const pagesRouter = require('./routes/pages');
 const authRouter = require('./routes/auth');
+const userRouter = require('./routes/users');
 const app = express();
 
 initializePassport(passport);
@@ -35,6 +36,7 @@ app.use(passport.session());
 
 app.use('/', authRouter);
 app.use('/', pagesRouter);
+app.use('/users', userRouter);
 
 app.listen(process.env.PORT, () => {
     console.log(`Server started and running on port ${process.env.PORT}`);
