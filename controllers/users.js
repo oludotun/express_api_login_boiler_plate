@@ -45,14 +45,14 @@ module.exports = {
                     });
                 } else {
                     if(result.error.errno === 1062) {
-                        return res.status(200).json({
+                        return res.status(409).json({
                             status: "error",
                             message: `The email '${body.email}' has already been taken.`
                         });
                     } else {
-                        return res.status(200).json({
+                        return res.status(500).json({
                             status: "error",
-                            message: `Account not created! An error has occurred.`
+                            message: `Account not created! Internal server error.`
                         });
                     }
                 }
